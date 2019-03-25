@@ -247,7 +247,7 @@ HAL_StatusTypeDef HAL_ETH_Init(ETH_HandleTypeDef *heth)
   heth->gState = HAL_ETH_STATE_BUSY;
   
   __HAL_RCC_SYSCFG_CLK_ENABLE();
-  
+
   if(heth->Init.MediaInterface == HAL_ETH_MII_MODE)
   {
     HAL_SYSCFG_ETHInterfaceSelect(SYSCFG_ETH_MII);
@@ -256,7 +256,7 @@ HAL_StatusTypeDef HAL_ETH_Init(ETH_HandleTypeDef *heth)
   {
     HAL_SYSCFG_ETHInterfaceSelect(SYSCFG_ETH_RMII);
   }
-  
+
   /* Ethernet Software reset */
   /* Set the SWR bit: resets all MAC subsystem internal registers and logic */
   /* After reset all the registers holds their respective reset values */
@@ -281,7 +281,7 @@ HAL_StatusTypeDef HAL_ETH_Init(ETH_HandleTypeDef *heth)
   
   /*------------------ MDIO CSR Clock Range Configuration --------------------*/
   ETH_MAC_MDIO_ClkConfig(heth);
-  
+
   /*------------------ MAC LPI 1US Tic Counter Configuration --------------------*/
   WRITE_REG(heth->Instance->MAC1USTCR, ((HAL_RCC_GetHCLKFreq() / ETH_MAC_US_TICK) - 1));
   
@@ -305,7 +305,7 @@ HAL_StatusTypeDef HAL_ETH_Init(ETH_HandleTypeDef *heth)
   {
     MODIFY_REG(heth->Instance->DMACRCR, ETH_DMACRCR_RBSZ, ((heth->Init.RxBuffLen) << 1));
   }
-  
+
   /*------------------ DMA Tx Descriptors Configuration ----------------------*/
   ETH_DMATxDescListInit(heth);
   

@@ -131,7 +131,6 @@ void HAL_ETH_MspInit(ETH_HandleTypeDef* ethHandle)
   if(ethHandle->Instance==ETH)
   {
   /* USER CODE BEGIN ETH_MspInit 0 */
-		dmc_puts("HAL_ETH_MspInit\n");
 
   /* USER CODE END ETH_MspInit 0 */
     /* Enable Peripheral clock */
@@ -194,7 +193,6 @@ void HAL_ETH_MspDeInit(ETH_HandleTypeDef* ethHandle)
   if(ethHandle->Instance==ETH)
   {
   /* USER CODE BEGIN ETH_MspDeInit 0 */
-		dmc_puts("HAL_ETH_MspDeInit\n");
 
   /* USER CODE END ETH_MspDeInit 0 */
     /* Disable Peripheral clock */
@@ -246,8 +244,6 @@ void HAL_ETH_MspDeInit(ETH_HandleTypeDef* ethHandle)
  */
 static void low_level_init(struct netif *netif)
 { 
-	dmc_puts("low_level_init\n");
-
   uint32_t idx = 0;
   HAL_StatusTypeDef hal_eth_init_status;
   
@@ -261,12 +257,6 @@ static void low_level_init(struct netif *netif)
   MACAddr[3] = 0x00;
   MACAddr[4] = 0x00;
   MACAddr[5] = 0x00;
-//  MACAddr[0] = 0xba;
-//  MACAddr[1] = 0xbe;
-//  MACAddr[2] = 0xde;
-//  MACAddr[3] = 0xaf;
-//  MACAddr[4] = 0xbe;
-//  MACAddr[5] = 0xef;
   heth.Init.MACAddr = &MACAddr[0];
   heth.Init.MediaInterface = HAL_ETH_RMII_MODE;
   heth.Init.TxDesc = DMATxDscrTab;
@@ -317,7 +307,6 @@ static void low_level_init(struct netif *netif)
     netif->flags |= NETIF_FLAG_BROADCAST;
   #endif /* LWIP_ARP */
   
-
 /* USER CODE BEGIN PHY_PRE_CONFIG */ 
     
 /* USER CODE END PHY_PRE_CONFIG */
@@ -372,7 +361,7 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
 {
 //	dmc_puts("low_level_output\n");
 
-   uint32_t i=0, framelen = 0;
+  uint32_t i=0, framelen = 0;
   struct pbuf *q;
   err_t errval = ERR_OK;
   ETH_BufferTypeDef Txbuffer[ETH_TX_DESC_CNT];
@@ -542,8 +531,6 @@ static err_t low_level_output_arp_off(struct netif *netif, struct pbuf *q, const
  */
 err_t ethernetif_init(struct netif *netif)
 {
-	dmc_puts("ethernetif_init\n");
-
   LWIP_ASSERT("netif != NULL", (netif != NULL));
   
 #if LWIP_NETIF_HOSTNAME

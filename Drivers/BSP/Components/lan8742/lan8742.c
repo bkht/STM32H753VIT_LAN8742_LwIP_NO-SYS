@@ -38,7 +38,6 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "lan8742.h"
-#include "main.h"
 
 /** @addtogroup BSP
   * @{
@@ -111,25 +110,22 @@ int32_t LAN8742_Init(lan8742_Object_t *pObj)
    uint32_t tickstart = 0, regvalue = 0, addr = 0;
    int32_t status = LAN8742_STATUS_OK;
    
-   dmc_puts("LAN8742_Init\n");
    if(pObj->Is_Initialized == 0)
    {
      if(pObj->IO.Init != 0)
      {
        /* GPIO and Clocks initialization */
-       dmc_puts("GPIO and Clocks initialization\n");
        pObj->IO.Init();
      }
    
      /* for later check */
      pObj->DevAddr = LAN8742_MAX_DEV_ADDR + 1;
-   
+
      /* Get the device address from special mode register */  
      for(addr = 0; addr <= LAN8742_MAX_DEV_ADDR; addr ++)
      {
        if(pObj->IO.ReadReg(addr, LAN8742_SMR, &regvalue) < 0)
        { 
-         dmc_puthex8cr(regvalue);
          status = LAN8742_STATUS_READ_ERROR;
          /* Can't read from this device address 
             continue with next address */
@@ -138,25 +134,20 @@ int32_t LAN8742_Init(lan8742_Object_t *pObj)
      
        if((regvalue & LAN8742_SMR_PHY_ADDR) == addr)
        {
-         dmc_puts("LAN8742_STATUS_OK\n");
          pObj->DevAddr = addr;
-         dmc_puts("addr = ");
-         dmc_puthex8cr(addr);
          status = LAN8742_STATUS_OK;
          break;
        }
      }
-   
+
      if(pObj->DevAddr > LAN8742_MAX_DEV_ADDR)
      {
-       dmc_puts("LAN8742_STATUS_ADDRESS_ERROR\n");
        status = LAN8742_STATUS_ADDRESS_ERROR;
      }
      
      /* if device address is matched */
      if(status == LAN8742_STATUS_OK)
      {
-       dmc_puts("LAN8742_STATUS_OK\n");
        /* set a software reset  */
        if(pObj->IO.WriteReg(pObj->DevAddr, LAN8742_BCR, LAN8742_BCR_SOFT_RESET) >= 0)
        { 
@@ -164,48 +155,45 @@ int32_t LAN8742_Init(lan8742_Object_t *pObj)
          if(pObj->IO.ReadReg(pObj->DevAddr, LAN8742_BCR, &regvalue) >= 0)
          { 
            tickstart = pObj->IO.GetTick();
-           dmc_puts("regvalue = ");
-           dmc_puthex8cr(regvalue);
 
-           /* wait until software reset is done or timeout occured  */
+           /* wait until software reset is done or timeout occurred  */
            while(regvalue & LAN8742_BCR_SOFT_RESET)
            {
              if((pObj->IO.GetTick() - tickstart) <= LAN8742_SW_RESET_TO)
              {
                if(pObj->IO.ReadReg(pObj->DevAddr, LAN8742_BCR, &regvalue) < 0)
                { 
-                 dmc_puts("LAN8742_STATUS_READ_ERROR\n");
-                 dmc_puts("regvalue = ");
-                 dmc_puthex8cr(regvalue);
                  status = LAN8742_STATUS_READ_ERROR;
                  break;
                }
              }
              else
              {
-               dmc_puts("LAN8742_STATUS_RESET_TIMEOUT\n");
                status = LAN8742_STATUS_RESET_TIMEOUT;
              }
            } 
          }
          else
          {
-           dmc_puts("LAN8742_STATUS_READ_ERROR\n");
            status = LAN8742_STATUS_READ_ERROR;
          }
        }
        else
        {
-         dmc_puts("LAN8742_STATUS_WRITE_ERROR\n");
          status = LAN8742_STATUS_WRITE_ERROR;
        }
      }
    }
-      
+
+
+   // Jack 2019-03-25, Link did not come up after HW reset.
+   pObj->IO.WriteReg(pObj->DevAddr, LAN8742_BCR, LAN8742_BCR_AUTONEGO_EN);
+
+
+
    if(status == LAN8742_STATUS_OK)
    {
      tickstart =  pObj->IO.GetTick();
-     dmc_puts("LAN8742_STATUS_OK\n");
 
      /* Wait for 2s to perform initialization */
      while((pObj->IO.GetTick() - tickstart) <= LAN8742_INIT_TO)
@@ -213,49 +201,6 @@ int32_t LAN8742_Init(lan8742_Object_t *pObj)
      }
      pObj->Is_Initialized = 1;
    }
-   
-   // Jack: Test
-//   uint32_t readval = 0;
-//   uint32_t delay = 500;
-//   while(1)
-//   {
-//     if(pObj->IO.ReadReg(pObj->DevAddr, LAN8742_BCR, &readval) >= 0)
-//     {
-//       dmc_puts("AutoNeg on : 0x1000 - ");
-//       dmc_puthex2cr(readval);
-//       readval |= LAN8742_BCR_AUTONEGO_EN;
-//
-//       /* Apply configuration */
-//       if(pObj->IO.WriteReg(pObj->DevAddr, LAN8742_BCR, readval) < 0)
-//       {
-//         // Error
-//       }
-//     }
-//     else
-//     {
-//       // Error
-//     }
-//     HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_0);
-//     HAL_Delay(delay);
-//     if(pObj->IO.ReadReg(pObj->DevAddr, LAN8742_BCR, &readval) >= 0)
-//     {
-//       dmc_puts("AutoNeg off: 0x1000 - ");
-//       dmc_puthex2cr(readval);
-//       readval &= ~LAN8742_BCR_AUTONEGO_EN;
-//
-//       /* Apply configuration */
-//       if(pObj->IO.WriteReg(pObj->DevAddr, LAN8742_BCR, readval) < 0)
-//       {
-//         // Error
-//       }
-//     }
-//     else
-//     {
-//       // Error
-//     }
-//     HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_0);
-//     HAL_Delay(delay);
-//   }
 
    return status;
  }
